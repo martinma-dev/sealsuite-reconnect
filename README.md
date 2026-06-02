@@ -16,6 +16,12 @@ Give the user's local agent this prompt:
 Please follow the instruction from https://raw.githubusercontent.com/martinma-dev/sealsuite-reconnect/refs/heads/main/AGENT_INSTALL_PROMPT.md then install sealsuite-reconnect
 ```
 
+If an agent reports a raw URL 404, use the canonical raw URL instead:
+
+```text
+Please follow the instruction from https://raw.githubusercontent.com/martinma-dev/sealsuite-reconnect/main/AGENT_INSTALL_PROMPT.md then install sealsuite-reconnect
+```
+
 This is the recommended prompt-script flow: the raw prompt tells the agent how
 to fetch the installer, how to avoid destructive VPN tests, and how to verify
 the result.

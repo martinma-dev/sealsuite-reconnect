@@ -13,7 +13,8 @@ Goal:
 - Verify status without intentionally disconnecting SealSuite.
 
 Source:
-- Prompt: https://raw.githubusercontent.com/martinma-dev/sealsuite-reconnect/refs/heads/main/AGENT_INSTALL_PROMPT.md
+- Prompt: https://raw.githubusercontent.com/martinma-dev/sealsuite-reconnect/main/AGENT_INSTALL_PROMPT.md
+- Alternate prompt URL: https://raw.githubusercontent.com/martinma-dev/sealsuite-reconnect/refs/heads/main/AGENT_INSTALL_PROMPT.md
 - Repository: https://github.com/martinma-dev/sealsuite-reconnect
 - Git clone URL: https://github.com/martinma-dev/sealsuite-reconnect.git
 - Zip URL: https://github.com/martinma-dev/sealsuite-reconnect/archive/refs/heads/main.zip
@@ -23,7 +24,8 @@ Safety rules:
 - Do not print or copy the contents of /usr/local/corplink/rpc.conf.
 - Do not call connectVpn manually and do not run reconnect tests by simulating a down VPN.
 - Do not modify unrelated files.
-- If the GitHub source cannot be fetched, stop and report the access problem.
+- If one raw prompt URL returns 404, try the alternate prompt URL before reporting an access problem.
+- If the GitHub source cannot be fetched after retrying the alternate URL, stop and report the access problem.
 - If Node.js is missing, stop and tell the user to install Node.js LTS first.
 
 Steps:
