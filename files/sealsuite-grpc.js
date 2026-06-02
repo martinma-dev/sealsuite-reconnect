@@ -56,9 +56,9 @@ function readToken() {
 
 function currentUser() {
   try {
-    return os.userInfo().username || process.env.USER || 'martin';
+    return os.userInfo().username || process.env.LOGNAME || process.env.USER || 'unknown';
   } catch (_) {
-    return process.env.USER || 'martin';
+    return process.env.LOGNAME || process.env.USER || 'unknown';
   }
 }
 
