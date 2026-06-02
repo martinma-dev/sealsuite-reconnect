@@ -4,6 +4,7 @@ set -eu
 PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/opt/homebrew/bin
 
 LABEL="${SEALSUITE_RECONNECT_LABEL:-com.sealsuite.reconnect}"
+LEGACY_LABELS=(com.martin.sealsuite.reconnect)
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SRC_DIR="$SCRIPT_DIR/files"
 STATE_DIR="$HOME/Library/Application Support/SealSuiteReconnect"
@@ -28,6 +29,34 @@ run() {
   else
     "$@"
   fi
+}
+
+safe_bootout() {
+  if (( DRY_RUN )); then
+    printf '+ launchctl bootout'
+    printf ' %q' "$@"
+    printf '\n'
+  else
+    launchctl bootout "$@" >/dev/null 2>&1 || true
+  fi
+}
+
+migrate_legacy_launch_agents() {
+  local uid legacy legacy_plist
+  uid="$(id -u)"
+
+  for legacy in "${LEGACY_LABELS[@]}"; do
+    [[ "$legacy" == "$LABEL" ]] && continue
+    legacy_plist="$LAUNCH_AGENTS_DIR/${legacy}.plist"
+    if [[ -e "$legacy_plist" ]] || launchctl print "gui/${uid}/${legacy}" >/dev/null 2>&1; then
+      say "Removing legacy LaunchAgent: $legacy"
+      safe_bootout "gui/${uid}" "$legacy_plist"
+      safe_bootout "gui/${uid}/${legacy}"
+      if [[ -e "$legacy_plist" ]]; then
+        run rm -f "$legacy_plist"
+      fi
+    fi
+  done
 }
 
 find_node() {
@@ -93,6 +122,7 @@ say "  label: $LABEL"
 say "  node:  $NODE_BIN"
 
 run mkdir -p "$STATE_DIR" "$LOG_DIR" "$LAUNCH_AGENTS_DIR"
+migrate_legacy_launch_agents
 run install -m 755 "$SRC_DIR/sealsuite-reconnect.sh" "$STATE_DIR/sealsuite-reconnect.sh"
 run install -m 755 "$SRC_DIR/sealsuite-grpc.js" "$STATE_DIR/sealsuite-grpc.js"
 run install -m 755 "$SRC_DIR/status.sh" "$STATE_DIR/status.sh"
@@ -138,7 +168,7 @@ fi
 
 if (( ! DRY_RUN )); then
   plutil -lint "$PLIST" >/dev/null
-  launchctl bootout "gui/$(id -u)" "$PLIST" >/dev/null 2>&1 || true
+  safe_bootout "gui/$(id -u)" "$PLIST"
   launchctl bootstrap "gui/$(id -u)" "$PLIST"
   launchctl enable "gui/$(id -u)/${LABEL}" >/dev/null 2>&1 || true
   launchctl kickstart -k "gui/$(id -u)/${LABEL}" >/dev/null 2>&1 || true

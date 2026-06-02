@@ -10,16 +10,21 @@ Corplink RPC token from `/usr/local/corplink/rpc.conf`.
 
 ## Install With An Agent
 
-Share this folder with another user, then give their local agent the contents of
-[AGENT_INSTALL_PROMPT.md](./AGENT_INSTALL_PROMPT.md).
+Give the user's local agent this prompt:
 
-This is the recommended prompt-script flow: the prompt tells the agent exactly
-what to install, how to avoid destructive VPN tests, and how to verify the
-result.
+```text
+Please follow the instruction from https://raw.githubusercontent.com/martinma-dev/sealsuite-reconnect/refs/heads/main/AGENT_INSTALL_PROMPT.md then install sealsuite-reconnect
+```
+
+This is the recommended prompt-script flow: the raw prompt tells the agent how
+to fetch the installer, how to avoid destructive VPN tests, and how to verify
+the result.
 
 ## Manual Install
 
 ```sh
+git clone https://github.com/martinma-dev/sealsuite-reconnect.git
+cd sealsuite-reconnect
 zsh ./install.sh
 ```
 

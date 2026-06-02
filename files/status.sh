@@ -8,13 +8,25 @@ VPN_CONF="/usr/local/corplink/vpn.conf"
 LOG_FILE="$HOME/Library/Logs/SealSuiteReconnect/reconnect.log"
 GRPC_HELPER="$STATE_DIR/sealsuite-grpc.js"
 LAUNCHD_LABEL="${SEALSUITE_RECONNECT_LABEL:-com.sealsuite.reconnect}"
+LEGACY_LABELS=(com.martin.sealsuite.reconnect)
 
 tun="$(plutil -extract TunName raw -o - "$VPN_CONF" 2>/dev/null || true)"
 state="$(cat "$STATE_DIR/state" 2>/dev/null || printf 0)"
 
 printf 'SealSuite reconnect watcher\n'
 printf '  launchd: '
-launchctl print "gui/$(id -u)/${LAUNCHD_LABEL}" >/dev/null 2>&1 && printf 'loaded\n' || printf 'not loaded\n'
+loaded_labels=""
+labels_to_check=("$LAUNCHD_LABEL" "${LEGACY_LABELS[@]}")
+for label in "${labels_to_check[@]}"; do
+  [[ "$loaded_labels" == *"$label"* ]] && continue
+  if launchctl print "gui/$(id -u)/${label}" >/dev/null 2>&1; then
+    display_label="$label"
+    [[ "$label" != "$LAUNCHD_LABEL" ]] && display_label="${label} legacy"
+    [[ -n "$loaded_labels" ]] && loaded_labels="${loaded_labels}, "
+    loaded_labels="${loaded_labels}${display_label}"
+  fi
+done
+[[ -n "$loaded_labels" ]] && printf 'loaded (%s)\n' "$loaded_labels" || printf 'not loaded\n'
 printf '  disabled: %s\n' "$([[ -e "$STATE_DIR/disabled" ]] && printf yes || printf no)"
 printf '  tunnel: %s\n' "${tun:-unknown}"
 if [[ -n "$tun" ]]; then
