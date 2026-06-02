@@ -91,6 +91,14 @@ open -e "$HOME/Library/Application Support/SealSuiteReconnect/vpn-connect.json"
 
 ## Uninstall
 
+Give the user's local agent this prompt:
+
+```text
+Please read and follow the uninstall instructions at https://raw.githubusercontent.com/martinma-dev/sealsuite-reconnect/main/AGENT_UNINSTALL_PROMPT.md, then uninstall sealsuite-reconnect from this Mac. Use that document as the source of truth and report the final uninstall status.
+```
+
+Manual uninstall:
+
 ```sh
 zsh ./uninstall.sh
 ```
