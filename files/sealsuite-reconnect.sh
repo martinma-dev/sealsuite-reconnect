@@ -39,6 +39,14 @@ notify() {
   setting_enabled "${SEALSUITE_RECONNECT_NOTIFY:-1}" || return 0
   [[ -x /usr/bin/osascript ]] || return 0
 
+  if setting_enabled "${SEALSUITE_RECONNECT_WAKE_GUI:-1}" && [[ -d "/Applications/SealSuite.app" ]]; then
+    /usr/bin/osascript \
+      -e 'on run argv' \
+      -e 'tell application id "com.volcengine.corplink" to display notification (item 1 of argv) with title "SealSuite Reconnect"' \
+      -e 'end run' \
+      "$message" >/dev/null 2>&1 && return 0
+  fi
+
   /usr/bin/osascript \
     -e 'on run argv' \
     -e 'display notification (item 1 of argv) with title "SealSuite Reconnect"' \
@@ -242,6 +250,11 @@ recover() {
 }
 
 main() {
+  if [[ "${1:-}" == "--notify-test" ]]; then
+    notify "SealSuite reconnect notification test."
+    exit 0
+  fi
+
   with_lock
 
   if [[ -e "$DISABLED_FILE" ]]; then

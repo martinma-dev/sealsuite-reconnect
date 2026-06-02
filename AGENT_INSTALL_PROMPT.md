@@ -45,11 +45,14 @@ Steps:
 4. Run: zsh ./install.sh
 5. Run:
    "$HOME/Library/Application Support/SealSuiteReconnect/status.sh"
-6. Report:
+6. Run the notification channel test. This must not reconnect or disconnect VPN:
+   "$HOME/Library/Application Support/SealSuiteReconnect/sealsuite-reconnect.sh" --notify-test
+7. Report:
    - Whether launchd is loaded.
    - The LaunchAgent label. It should be com.sealsuite.reconnect.
    - Whether the tunnel is currently healthy.
    - Whether Corplink RPC status is readable.
+   - Whether the notification test command succeeded, and whether the user may need to allow or unsilence notifications for SealSuite.
    - The log path: "$HOME/Library/Logs/SealSuiteReconnect/reconnect.log"
 
 Expected behavior:

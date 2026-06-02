@@ -73,6 +73,12 @@ To disable macOS notifications, reinstall with:
 SEALSUITE_RECONNECT_NOTIFY=0 zsh ./install.sh
 ```
 
+Test the notification channel without reconnecting or disconnecting VPN:
+
+```sh
+"$HOME/Library/Application Support/SealSuiteReconnect/sealsuite-reconnect.sh" --notify-test
+```
+
 ## Reconnect Config
 
 Default config:
