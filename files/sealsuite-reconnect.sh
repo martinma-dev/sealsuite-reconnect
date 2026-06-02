@@ -216,6 +216,7 @@ recover() {
   tun_after="$(read_tun_name)"
   if tunnel_is_up "$tun_after"; then
     log "recovery confirmed tun=${tun_after}"
+    wake_sealsuite_ui
     notify "SealSuite tunnel recovered on ${tun_after}."
   else
     log "recovery attempted; tunnel still down tun=${tun_after:-unknown}"
