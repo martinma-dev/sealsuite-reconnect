@@ -13,13 +13,13 @@ Corplink RPC token from `/usr/local/corplink/rpc.conf`.
 Give the user's local agent this prompt:
 
 ```text
-Please follow the instruction from https://raw.githubusercontent.com/martinma-dev/sealsuite-reconnect/refs/heads/main/AGENT_INSTALL_PROMPT.md then install sealsuite-reconnect
+Please read and follow the installation instructions at https://raw.githubusercontent.com/martinma-dev/sealsuite-reconnect/refs/heads/main/AGENT_INSTALL_PROMPT.md, then install sealsuite-reconnect on this Mac. Use that document as the source of truth and report the final installation status.
 ```
 
 If an agent reports a raw URL 404, use the canonical raw URL instead:
 
 ```text
-Please follow the instruction from https://raw.githubusercontent.com/martinma-dev/sealsuite-reconnect/main/AGENT_INSTALL_PROMPT.md then install sealsuite-reconnect
+Please read and follow the installation instructions at https://raw.githubusercontent.com/martinma-dev/sealsuite-reconnect/main/AGENT_INSTALL_PROMPT.md, then install sealsuite-reconnect on this Mac. Use that document as the source of truth and report the final installation status.
 ```
 
 This is the recommended prompt-script flow: the raw prompt tells the agent how
