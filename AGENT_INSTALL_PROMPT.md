@@ -11,7 +11,7 @@ Goal:
 - Install the files locally.
 - Register a user LaunchAgent that runs every 60 seconds after login.
 - Verify status without intentionally disconnecting SealSuite.
-- Keep the SealSuite UI consistent with backend reconnect state by allowing the watcher to activate the UI during recovery.
+- Keep the SealSuite UI consistent with backend reconnect state by allowing the watcher to restart/activate the UI during recovery.
 
 Source:
 - Prompt: https://raw.githubusercontent.com/martinma-dev/sealsuite-reconnect/main/AGENT_INSTALL_PROMPT.md
@@ -56,7 +56,7 @@ Expected behavior:
 - The watcher is a user LaunchAgent, so it starts after the user logs in.
 - It is not a constantly running daemon; launchd runs it every 60 seconds.
 - If the SealSuite tunnel is down for consecutive checks, it wakes the background Corplink agent and calls local Corplink connectVpn.
-- By default it may activate the SealSuite UI during recovery so the visible state can catch up with the backend tunnel state. macOS notifications may appear for reconnect attempts and outcomes.
+- By default it may restart/activate the SealSuite UI during recovery so the visible state reloads against the backend tunnel state. macOS notifications may appear for reconnect attempts and outcomes.
 - Manual status checks must not flap or reconnect the VPN.
 - The installer can replace an older SealSuite reconnect LaunchAgent and preserves the local vpn-connect.json config.
 ```

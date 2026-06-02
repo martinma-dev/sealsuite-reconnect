@@ -3,8 +3,8 @@
 Small macOS user LaunchAgent for SealSuite/Corplink. It checks SealSuite's
 recorded tunnel once per minute. If the tunnel is missing/down for consecutive
 checks, it wakes the background Corplink agent and calls Corplink's local gRPC
-`connectVpn`. By default it also activates the SealSuite UI during recovery so
-the visible app state can catch up with the backend tunnel state.
+`connectVpn`. By default it also restarts/activates the SealSuite UI during
+recovery so the visible app state reloads against the backend tunnel state.
 
 The package does not include any user token. At runtime it reads the local
 Corplink RPC token from `/usr/local/corplink/rpc.conf`.
@@ -58,7 +58,7 @@ rm "$HOME/Library/Application Support/SealSuiteReconnect/disabled"
 
 The watcher keeps the UI consistent by default:
 
-- `SEALSUITE_RECONNECT_WAKE_GUI=1`: activate the SealSuite UI during recovery.
+- `SEALSUITE_RECONNECT_WAKE_GUI=1`: restart/activate the SealSuite UI during recovery.
 - `SEALSUITE_RECONNECT_NOTIFY=1`: send macOS notifications for reconnect attempts and outcomes.
 
 To keep reconnect recovery fully in the background, reinstall with:

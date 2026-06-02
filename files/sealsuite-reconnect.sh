@@ -132,6 +132,21 @@ wake_sealsuite_ui() {
   fi
 }
 
+restart_sealsuite_ui() {
+  local uid="$1"
+  setting_enabled "${SEALSUITE_RECONNECT_WAKE_GUI:-1}" || return 0
+
+  if launchctl print "gui/${uid}/SealSuite" >/dev/null 2>&1; then
+    log "restarting SealSuite UI through launchd"
+    launchctl kickstart -k "gui/${uid}/SealSuite" >/dev/null 2>&1 || \
+      log "SealSuite UI launchd restart failed; falling back to activation"
+  else
+    log "SealSuite launchd job not found; activating UI"
+  fi
+
+  wake_sealsuite_ui
+}
+
 ensure_processes_running() {
   if setting_enabled "${SEALSUITE_RECONNECT_WAKE_GUI:-1}"; then
     wake_sealsuite_ui
@@ -203,8 +218,7 @@ recover() {
   # tunnel is already confirmed absent, so they should not interrupt a live VPN.
   launchctl kickstart -k "gui/${uid}/com.volcengine.corplink.agent" >/dev/null 2>&1 || true
   if setting_enabled "${SEALSUITE_RECONNECT_WAKE_GUI:-1}"; then
-    launchctl kickstart -k "gui/${uid}/SealSuite" >/dev/null 2>&1 || true
-    wake_sealsuite_ui
+    restart_sealsuite_ui "$uid"
   else
     log "SealSuite UI wake skipped because wake_gui=0"
   fi
