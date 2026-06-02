@@ -33,8 +33,7 @@ Steps:
 2. Fetch a fresh copy of the repository into a temporary directory:
    WORKDIR="$(mktemp -d "${TMPDIR:-/tmp}/sealsuite-reconnect.XXXXXX")"
    cd "$WORKDIR"
-   if command -v git >/dev/null 2>&1; then
-     git clone --depth 1 https://github.com/martinma-dev/sealsuite-reconnect.git
+   if command -v git >/dev/null 2>&1 && git clone --depth 1 https://github.com/martinma-dev/sealsuite-reconnect.git sealsuite-reconnect; then
      cd sealsuite-reconnect
    else
      curl -fsSL --retry 3 -o sealsuite-reconnect.zip https://github.com/martinma-dev/sealsuite-reconnect/archive/refs/heads/main.zip

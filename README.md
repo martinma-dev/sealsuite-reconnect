@@ -67,7 +67,7 @@ Default config:
 Edit:
 
 ```sh
-"$HOME/Library/Application Support/SealSuiteReconnect/vpn-connect.json"
+open -e "$HOME/Library/Application Support/SealSuiteReconnect/vpn-connect.json"
 ```
 
 ## Uninstall

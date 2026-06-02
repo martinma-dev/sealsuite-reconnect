@@ -19,6 +19,7 @@ LOCK_DIR="/tmp/sealsuite-reconnect.lock"
 
 FAIL_THRESHOLD=2
 COOLDOWN_SECONDS=180
+LOCK_MAX_AGE_SECONDS=300
 
 mkdir -p "$STATE_DIR" "$LOG_DIR"
 
@@ -28,7 +29,18 @@ log() {
 
 with_lock() {
   if ! mkdir "$LOCK_DIR" 2>/dev/null; then
-    exit 0
+    local now=0
+    local modified=0
+
+    now="$(date +%s)"
+    modified="$(stat -f %m "$LOCK_DIR" 2>/dev/null || printf 0)"
+    if (( modified > 0 && now - modified > LOCK_MAX_AGE_SECONDS )); then
+      log "removing stale lock age_seconds=$((now - modified))"
+      rmdir "$LOCK_DIR" 2>/dev/null || exit 0
+      mkdir "$LOCK_DIR" 2>/dev/null || exit 0
+    else
+      exit 0
+    fi
   fi
   trap 'rmdir "$LOCK_DIR" 2>/dev/null || true' EXIT INT TERM
 }
