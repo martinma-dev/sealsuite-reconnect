@@ -23,7 +23,7 @@ launchd_env_value() {
 tun="$(plutil -extract TunName raw -o - "$VPN_CONF" 2>/dev/null || true)"
 state="$(cat "$STATE_DIR/state" 2>/dev/null || printf 0)"
 notify_value="$(launchd_env_value SEALSUITE_RECONNECT_NOTIFY "${SEALSUITE_RECONNECT_NOTIFY:-1}")"
-wake_gui_value="$(launchd_env_value SEALSUITE_RECONNECT_WAKE_GUI "${SEALSUITE_RECONNECT_WAKE_GUI:-0}")"
+wake_gui_value="$(launchd_env_value SEALSUITE_RECONNECT_WAKE_GUI "${SEALSUITE_RECONNECT_WAKE_GUI:-1}")"
 
 printf 'SealSuite reconnect watcher\n'
 printf '  launchd: '

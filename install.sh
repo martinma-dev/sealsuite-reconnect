@@ -114,7 +114,7 @@ if [[ -z "$NODE_BIN" ]]; then
   exit 1
 fi
 NOTIFY_VALUE="$(normalize_flag "${SEALSUITE_RECONNECT_NOTIFY:-1}")"
-WAKE_GUI_VALUE="$(normalize_flag "${SEALSUITE_RECONNECT_WAKE_GUI:-0}")"
+WAKE_GUI_VALUE="$(normalize_flag "${SEALSUITE_RECONNECT_WAKE_GUI:-1}")"
 
 if [[ ! -d "/Applications/SealSuite.app" ]]; then
   say "warning: /Applications/SealSuite.app was not found."

@@ -116,14 +116,27 @@ mark_recovered() {
   date +%s > "$LAST_RECOVER_FILE"
 }
 
+wake_sealsuite_ui() {
+  setting_enabled "${SEALSUITE_RECONNECT_WAKE_GUI:-1}" || return 0
+
+  if /usr/bin/open -a SealSuite >/dev/null 2>&1; then
+    log "activated SealSuite UI"
+    return 0
+  fi
+
+  if [[ -x "$APP_BIN" ]]; then
+    log "starting SealSuite process because SEALSUITE_RECONNECT_WAKE_GUI is enabled"
+    "$APP_BIN" >/dev/null 2>&1 &
+  else
+    log "SealSuite UI wake skipped: app binary missing"
+  fi
+}
+
 ensure_processes_running() {
-  if ! pgrep -x SealSuite >/dev/null 2>&1; then
-    if setting_enabled "${SEALSUITE_RECONNECT_WAKE_GUI:-0}" && [[ -x "$APP_BIN" ]]; then
-      log "starting SealSuite process because SEALSUITE_RECONNECT_WAKE_GUI is enabled"
-      "$APP_BIN" >/dev/null 2>&1 &
-    else
-      log "SealSuite GUI is not running; silent mode leaves it closed"
-    fi
+  if setting_enabled "${SEALSUITE_RECONNECT_WAKE_GUI:-1}"; then
+    wake_sealsuite_ui
+  elif ! pgrep -x SealSuite >/dev/null 2>&1; then
+    log "SealSuite GUI is not running; wake_gui=0 leaves it closed"
   fi
 
   if ! pgrep -x CorplinkNe >/dev/null 2>&1 && [[ -x "$AGENT_BIN" ]]; then
@@ -189,10 +202,11 @@ recover() {
   # Prefer launchd-managed restarts when available. These only run after the
   # tunnel is already confirmed absent, so they should not interrupt a live VPN.
   launchctl kickstart -k "gui/${uid}/com.volcengine.corplink.agent" >/dev/null 2>&1 || true
-  if setting_enabled "${SEALSUITE_RECONNECT_WAKE_GUI:-0}"; then
+  if setting_enabled "${SEALSUITE_RECONNECT_WAKE_GUI:-1}"; then
     launchctl kickstart -k "gui/${uid}/SealSuite" >/dev/null 2>&1 || true
+    wake_sealsuite_ui
   else
-    log "SealSuite launchd kickstart skipped in silent mode"
+    log "SealSuite UI wake skipped because wake_gui=0"
   fi
 
   sleep 2
@@ -252,7 +266,7 @@ main() {
   fi
 
   log "recovery triggered"
-  notify "SealSuite tunnel is down; attempting silent reconnect."
+  notify "SealSuite tunnel is down; attempting reconnect."
   recover
 }
 
