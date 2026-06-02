@@ -17,6 +17,13 @@ if [[ "${1:-}" == "--dry-run" ]]; then
   DRY_RUN=1
 fi
 
+normalize_flag() {
+  case "${1:l}" in
+    1|true|yes|on) printf '1' ;;
+    *) printf '0' ;;
+  esac
+}
+
 say() {
   printf '%s\n' "$*"
 }
@@ -106,6 +113,8 @@ if [[ -z "$NODE_BIN" ]]; then
   say "Common options: Homebrew node, nvm, Volta, asdf, mise, or nodenv."
   exit 1
 fi
+NOTIFY_VALUE="$(normalize_flag "${SEALSUITE_RECONNECT_NOTIFY:-1}")"
+WAKE_GUI_VALUE="$(normalize_flag "${SEALSUITE_RECONNECT_WAKE_GUI:-0}")"
 
 if [[ ! -d "/Applications/SealSuite.app" ]]; then
   say "warning: /Applications/SealSuite.app was not found."
@@ -120,6 +129,8 @@ fi
 say "Installing SealSuite Reconnect Watcher..."
 say "  label: $LABEL"
 say "  node:  $NODE_BIN"
+say "  notify: $NOTIFY_VALUE"
+say "  wake_gui: $WAKE_GUI_VALUE"
 
 run mkdir -p "$STATE_DIR" "$LOG_DIR" "$LAUNCH_AGENTS_DIR"
 migrate_legacy_launch_agents
@@ -156,6 +167,10 @@ else
   <dict>
     <key>SEALSUITE_RECONNECT_LABEL</key>
     <string>${LABEL}</string>
+    <key>SEALSUITE_RECONNECT_NOTIFY</key>
+    <string>${NOTIFY_VALUE}</string>
+    <key>SEALSUITE_RECONNECT_WAKE_GUI</key>
+    <string>${WAKE_GUI_VALUE}</string>
   </dict>
   <key>StandardOutPath</key>
   <string>${LOG_DIR}/launchd.out.log</string>

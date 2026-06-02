@@ -27,6 +27,25 @@ log() {
   printf '%s %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" >> "$LOG_FILE"
 }
 
+setting_enabled() {
+  case "${1:l}" in
+    1|true|yes|on) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+notify() {
+  local message="$1"
+  setting_enabled "${SEALSUITE_RECONNECT_NOTIFY:-1}" || return 0
+  [[ -x /usr/bin/osascript ]] || return 0
+
+  /usr/bin/osascript \
+    -e 'on run argv' \
+    -e 'display notification (item 1 of argv) with title "SealSuite Reconnect"' \
+    -e 'end run' \
+    "$message" >/dev/null 2>&1 || true
+}
+
 with_lock() {
   if ! mkdir "$LOCK_DIR" 2>/dev/null; then
     local now=0
@@ -98,9 +117,13 @@ mark_recovered() {
 }
 
 ensure_processes_running() {
-  if ! pgrep -x SealSuite >/dev/null 2>&1 && [[ -x "$APP_BIN" ]]; then
-    log "starting SealSuite process"
-    "$APP_BIN" >/dev/null 2>&1 &
+  if ! pgrep -x SealSuite >/dev/null 2>&1; then
+    if setting_enabled "${SEALSUITE_RECONNECT_WAKE_GUI:-0}" && [[ -x "$APP_BIN" ]]; then
+      log "starting SealSuite process because SEALSUITE_RECONNECT_WAKE_GUI is enabled"
+      "$APP_BIN" >/dev/null 2>&1 &
+    else
+      log "SealSuite GUI is not running; silent mode leaves it closed"
+    fi
   fi
 
   if ! pgrep -x CorplinkNe >/dev/null 2>&1 && [[ -x "$AGENT_BIN" ]]; then
@@ -139,11 +162,13 @@ connect_vpn_rpc() {
 
   if [[ -z "$node" ]]; then
     log "connectVpn skipped: node binary not found"
+    notify "Reconnect skipped because Node.js was not found."
     return 1
   fi
 
   if [[ ! -r "$GRPC_HELPER" ]]; then
     log "connectVpn skipped: grpc helper missing"
+    notify "Reconnect skipped because the gRPC helper is missing."
     return 1
   fi
 
@@ -164,7 +189,11 @@ recover() {
   # Prefer launchd-managed restarts when available. These only run after the
   # tunnel is already confirmed absent, so they should not interrupt a live VPN.
   launchctl kickstart -k "gui/${uid}/com.volcengine.corplink.agent" >/dev/null 2>&1 || true
-  launchctl kickstart -k "gui/${uid}/SealSuite" >/dev/null 2>&1 || true
+  if setting_enabled "${SEALSUITE_RECONNECT_WAKE_GUI:-0}"; then
+    launchctl kickstart -k "gui/${uid}/SealSuite" >/dev/null 2>&1 || true
+  else
+    log "SealSuite launchd kickstart skipped in silent mode"
+  fi
 
   sleep 2
   connect_vpn_rpc || true
@@ -173,8 +202,10 @@ recover() {
   tun_after="$(read_tun_name)"
   if tunnel_is_up "$tun_after"; then
     log "recovery confirmed tun=${tun_after}"
+    notify "SealSuite tunnel recovered on ${tun_after}."
   else
     log "recovery attempted; tunnel still down tun=${tun_after:-unknown}"
+    notify "SealSuite reconnect was attempted, but the tunnel is still down."
   fi
 
   mark_recovered
@@ -221,6 +252,7 @@ main() {
   fi
 
   log "recovery triggered"
+  notify "SealSuite tunnel is down; attempting silent reconnect."
   recover
 }
 

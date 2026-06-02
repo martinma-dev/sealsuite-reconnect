@@ -10,8 +10,20 @@ GRPC_HELPER="$STATE_DIR/sealsuite-grpc.js"
 LAUNCHD_LABEL="${SEALSUITE_RECONNECT_LABEL:-com.sealsuite.reconnect}"
 LEGACY_LABELS=(com.martin.sealsuite.reconnect)
 
+launchd_env_value() {
+  local key="$1"
+  local fallback="$2"
+  local plist="$HOME/Library/LaunchAgents/${LAUNCHD_LABEL}.plist"
+  local value=""
+
+  value="$(plutil -extract "EnvironmentVariables.${key}" raw -o - "$plist" 2>/dev/null || true)"
+  [[ -n "$value" ]] && printf '%s' "$value" || printf '%s' "$fallback"
+}
+
 tun="$(plutil -extract TunName raw -o - "$VPN_CONF" 2>/dev/null || true)"
 state="$(cat "$STATE_DIR/state" 2>/dev/null || printf 0)"
+notify_value="$(launchd_env_value SEALSUITE_RECONNECT_NOTIFY "${SEALSUITE_RECONNECT_NOTIFY:-1}")"
+wake_gui_value="$(launchd_env_value SEALSUITE_RECONNECT_WAKE_GUI "${SEALSUITE_RECONNECT_WAKE_GUI:-0}")"
 
 printf 'SealSuite reconnect watcher\n'
 printf '  launchd: '
@@ -27,6 +39,8 @@ for label in "${labels_to_check[@]}"; do
   fi
 done
 [[ -n "$loaded_labels" ]] && printf 'loaded (%s)\n' "$loaded_labels" || printf 'not loaded\n'
+printf '  notify: %s\n' "$notify_value"
+printf '  wake_gui: %s\n' "$wake_gui_value"
 printf '  disabled: %s\n' "$([[ -e "$STATE_DIR/disabled" ]] && printf yes || printf no)"
 printf '  tunnel: %s\n' "${tun:-unknown}"
 if [[ -n "$tun" ]]; then
